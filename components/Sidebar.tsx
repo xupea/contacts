@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
-
 import * as Haptics from "expo-haptics";
 
 interface Tooltip {
@@ -15,12 +14,14 @@ interface SidebarProps {
   data: Data[];
   selectedIdx: number;
   onSectionChange: (id: number) => void;
+  onPanning: (panning: boolean) => void;
 }
 
 export default function Sidebar({
   selectedIdx,
   onSectionChange,
   data,
+  onPanning,
 }: SidebarProps) {
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
 
@@ -29,23 +30,22 @@ export default function Sidebar({
   const containerPageYRef = useRef(0);
   const containerHeightRef = useRef(0);
 
-  const selectedIdxRef = useRef(selectedIdx);
+  const selectedIdxRef = useRef(0);
 
   const containerRef = useRef<View | null>(null);
 
   const panResponder = useRef(
     PanResponder.create({
-      // Ask to be the responder:
       onStartShouldSetPanResponder: (evt, gestureState) => true,
       onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
       onMoveShouldSetPanResponder: (evt, gestureState) => true,
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-
       onPanResponderGrant: (evt, gestureState) => {
         // The gesture has started. Show visual feedback so the user knows
         // what is happening!
         // gestureState.d{x,y} will be set to zero now
         panningRef.current = true;
+        onPanning(true);
       },
       onPanResponderMove: (evt, gestureState) => {
         // The most recent move distance is gestureState.move{X,Y}
@@ -68,13 +68,18 @@ export default function Sidebar({
             idx: data.length - 1,
           });
         } else {
-          const newIdx = Math.floor((currentY - containerY) / 24);
+          const h = (containerHeightRef.current / data.length) | 0;
+
+          const newIdx = Math.floor((currentY - containerY) / h);
 
           if (selectedIdxRef.current !== newIdx) {
+            console.log("newIdx", selectedIdxRef.current, newIdx);
+            selectedIdxRef.current = newIdx;
+
             onSectionChange(newIdx);
 
             setTooltip({
-              idx: Math.floor((currentY - containerY) / 24),
+              idx: Math.floor((currentY - containerY) / h),
             });
           }
         }
@@ -83,15 +88,7 @@ export default function Sidebar({
       onPanResponderRelease: (evt, gestureState) => {
         setTooltip(null);
         panningRef.current = false;
-      },
-      onPanResponderTerminate: (evt, gestureState) => {
-        // Another component has become the responder, so this gesture
-        // should be cancelled
-      },
-      onShouldBlockNativeResponder: (evt, gestureState) => {
-        // Returns whether this component should block native components from becoming the JS
-        // responder. Returns true by default. Is currently only supported on android.
-        return true;
+        onPanning(false);
       },
     })
   ).current;
@@ -119,6 +116,7 @@ export default function Sidebar({
         ref={containerRef}
       >
         {data.map(({ title }, idx) => {
+          console.log(tooltip?.idx);
           return (
             <View
               style={[
@@ -152,16 +150,18 @@ export default function Sidebar({
 
 const styles = StyleSheet.create({
   item: {
-    paddingHorizontal: 5,
+    paddingHorizontal: 3,
+    paddingVertical: 2,
     position: "relative",
   },
   title: {
-    fontSize: 20,
+    fontSize: 10,
+    fontWeight: "500",
     textAlign: "center",
   },
   container: {
     position: "absolute",
-    right: 2,
+    right: 4,
     top: 0,
     bottom: 0,
     alignItems: "center",
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   sidebar: {},
   selected: {
     backgroundColor: "#57be6a",
-    borderRadius: 12,
+    borderRadius: 20,
   },
   textSelected: {
     color: "#ffffff",
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   tooltip: {
     position: "absolute",
     right: 60,
-    top: -8,
+    top: -12,
     backgroundColor: "#c9c9c9",
 
     alignItems: "center",

@@ -154,9 +154,50 @@ const DATA = [
     title: "T",
     data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
   },
+  {
+    title: "U",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
+  {
+    title: "V",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
+  {
+    title: "W",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
+  {
+    title: "X",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
+  {
+    title: "Y",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
+  {
+    title: "Z",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
+  {
+    title: "#",
+    data: ["Timbaland", "Tobu", "腾格尔", "谭咏麟", "陶喆"],
+  },
 ];
 
+const defaultData = {
+  title: "*",
+  data: [
+    "新的朋友",
+    "仅聊天的朋友",
+    "群聊",
+    "标签",
+    "公众号",
+    "企业微信联系人",
+  ],
+};
+
 export default function TabOneScreen() {
+  const [panning, setPanning] = useState(false);
   const [selectedSectionIdx, setSelectedSectionIdx] = useState(0);
   const contactRef = useRef<ContactRef | null>(null);
 
@@ -171,11 +212,17 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <Contacts ref={contactRef} onSectionChange={changeIndex} />
+      <Contacts
+        data={[...DATA]}
+        panning={panning}
+        ref={contactRef}
+        onSectionChange={changeIndex}
+      />
       <Sidebar
         data={DATA}
         selectedIdx={selectedSectionIdx}
         onSectionChange={changeIndex2}
+        onPanning={(p) => setPanning(p)}
       />
     </View>
   );
